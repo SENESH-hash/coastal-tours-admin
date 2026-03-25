@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coastal Tours — Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg:       #faf8f4;
+            --surface:  #ffffff;
+            --border:   #e5dfd5;
+            --text:     #1e1a14;
+            --muted:    #7a7264;
+            --teal:     #1a6b6e;
+            --teal-lt:  #e8f4f4;
+            --amber:    #d4862a;
+            --amber-lt: #fef3e2;
+            --red:      #c0392b;
+            --green:    #2d7a4b;
+            --shadow:   0 2px 12px rgba(0,0,0,.07);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* ── Login Screen ───────────────────────── */
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--teal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .login-box {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 42px;
+            width: 360px;
+            box-shadow: 0 8px 40px rgba(0,0,0,.25);
+            text-align: center;
+        }
+
+        .login-box .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: var(--teal);
+            margin-bottom: 6px;
+        }
+
+        .login-box p {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            font-size: 14px;
+            font-family: inherit;
+            margin-bottom: 14px;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px var(--teal-lt);
+        }
+
+        .login-box .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--teal);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .login-box .login-btn:hover { background: #155557; }
+        #login-error { color: var(--red); font-size: 13px; margin-top: 10px; min-height: 18px; }
+
+        /* ── Layout ─────────────────────────────── */
+        .container { display: flex; min-height: 100vh; }
+
+        .sidebar {
+            width: 240px;
+            background: var(--teal);
+            color: #e8f4f4;
+            padding: 24px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            padding: 0 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,.12);
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .nav-label {
+            padding: 20px 20px 7px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: rgba(255,255,255,.45);
+        }
+
+        .nav-item {
+            padding: 11px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            border-left: 3px solid transparent;
+            transition: background .15s;
+        }
+
+        .nav-item:hover { background: rgba(255,255,255,.08); }
+        .nav-item.active { background: rgba(255,255,255,.15); border-left-color: var(--amber); color: #fff; }
+
+        .admin-tag {
+            margin-top: auto;
+            padding: 18px 20px 0;
+            border-top: 1px solid rgba(255,255,255,.1);
+            font-size: 13px;
+            color: rgba(255,255,255,.6);
+        }
+
+        /* ── Main Content ───────────────────────── */
+        .main { margin-left: 240px; flex: 1; padding: 28px; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface);
+            padding: 18px 22px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+
+        .header h1 { font-size: 24px; font-weight: 700; }
+        .header-actions { display: flex; gap: 8px; }
+
+        /* ── Buttons ────────────────────────────── */
+        .btn {
+            padding: 9px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: all .15s;
+        }
+
+        .btn-primary   { background: var(--teal); color: #fff; }
+        .btn-primary:hover { background: #155557; }
+        .btn-secondary { background: var(--teal-lt); color: var(--teal); }
+        .btn-secondary:hover { background: #d5ecec; }
+        .btn-danger    { background: var(--red); color: #fff; }
+        .btn-danger:hover { filter: brightness(.9); }
+        .btn-sm        { padding: 5px 11px; font-size: 12px; }
+
+        /* ── Sections & Tabs ────────────────────── */
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--surface);
+            padding: 0 20px;
+            border-bottom: 2px solid var(--border);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab {
+            padding: 13px 18px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--muted);
+            border-bottom: 3px solid transparent;
+            position: relative;
+            bottom: -2px;
+            transition: color .15s;
+        }
+
+        .tab:hover { color: var(--teal); }
+        .tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+        /* ── Cards ──────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .card h3 { font-size: 16px; font-weight: 600; }
+
+        /* ── Stats ──────────────────────────────── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--teal);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-value { font-size: 30px; font-weight: 700; }
+
+        /* ── Tables ─────────────────────────────── */
+        .table-wrap {
+            overflow-x: auto;
+            background: var(--surface);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--teal-lt); border-bottom: 2px solid var(--border); }
+
+        th {
+            padding: 13px 15px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--teal);
+        }
+
+        td { padding: 13px 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        tbody tr:hover { background: var(--bg); }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .badge-green { background: #d4edda; color: var(--green); }
+        .badge-amber { background: var(--amber-lt); color: var(--amber); }
+        .badge-red   { background: #fde8e6; color: var(--red); }
+        .badge-blue  { background: var(--teal-lt); color: var(--teal); }
+
+        /* ── Filter Bar ─────────────────────────── */
+        .filter-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            background: var(--surface);
+            padding: 18px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        /* ── Forms ──────────────────────────────── */
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea,
+        .filter-bar input,
+        .filter-bar select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--surface);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px var(--teal-lt);
+        }
+
+        /* ── Modal ──────────────────────────────── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0,0,0,.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--surface);
+            padding: 28px;
+            border-radius: 10px;
+            max-width: 580px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .close-btn { background: none; border: none; font-size: 26px; cursor: pointer; color: var(--muted); }
+        .close-btn:hover { color: var(--text); }
+
+        /* ── Progress Bars ──────────────────────── */
+        .progress-row { display: flex; align-items: center; margin-bottom: 14px; gap: 12px; }
+        .progress-label { width: 130px; font-size: 14px; }
+        .progress-track { flex: 1; background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-fill { background: var(--teal); height: 100%; }
+        .progress-count { width: 36px; text-align: right; font-size: 14px; color: var(--muted); }
+
+        /* ── Responsive ─────────────────────────── */
+        @media (max-width: 768px) {
+            .sidebar { width: 200px; }
+            .main { margin-left: 200px; padding: 15px; }
+            .header { flex-direction: column; align-items: flex-start; }
+            .stats-grid, .form-row { grid-template-columns: 1fr; }
+            .filter-bar { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Login Screen ──────────────────────────────────────── -->
+<div id="login-screen">
+    <div class="login-box">
+        <div class="brand">🌊 Coastal Tours</div>
+        <p>Admin Portal — Sign in to continue</p>
+        <input type="text" id="login-user" placeholder="Username">
+        <input type="password" id="login-pass" placeholder="Password">
+        <button class="login-btn" onclick="doLogin()">Sign In</button>
+        <div id="login-error"></div>
+    </div>
+</div>
+
+<!-- ── App Shell ─────────────────────────────────────────── -->
+<div class="container">
+
+    <div class="sidebar">
+        <div class="logo">🌊 Coastal Tours</div>
+
+        <div class="nav-label">Main</div>
+        <div class="nav-item active" data-nav="dashboard">📊 Dashboard</div>
+
+        <div class="nav-label">Management</div>
+        <div class="nav-item" data-nav="tours">✈️ Tours</div>
+        <div class="nav-item" data-nav="bookings">📅 Bookings</div>
+        <div class="nav-item" data-nav="users">👥 Users</div>
+
+        <div class="nav-label">Business</div>
+        <div class="nav-item" data-nav="reports">📈 Reports</div>
+        <div class="nav-item" data-nav="support">💬 Support</div>
+
+        <div class="nav-label">Account</div>
+        <div class="nav-item" data-nav="settings">⚙️ Settings</div>
+
+        <div class="admin-tag">👤 Mohammed</div>
+    </div>
+
+    <div class="main">
+
+        <!-- ── Dashboard ─────────────────────────── -->
+        <div id="dashboard" class="content-section active">
+            <div class="header">
+                <h1>Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary">Today</button>
+                    <button class="btn btn-secondary">This Month</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Bookings</div>
+                    <div class="stat-value">1,248</div>
+                </div>
+                <div class="stat-card" style="border-left-color:var(--green);">
+                    <div class="stat-label">Revenue</div>
+                    <div class="stat-value">$84,230</div>
+                </div>
+                <div class="stat-card" style="border-left-color:var(--amber);">
+                    <div class="stat-label">Pending</div>
+                    <div class="stat-value">45</div>
+                </div>
+                <div class="stat-card" style="border-left-color:var(--red);">
+                    <div class="stat-label">Cancellations</div>
+                    <div class="stat-value">12</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Recent Bookings</h3>
+                <div class="table-wrap" style="margin-top:14px;">
+                    <table>
+                        <thead>
+                            <tr><th>Booking ID</th><th>Customer</th><th>Tour</th><th>Date</th><th>Status</th><th>Amount</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>#BK-2024-001</td><td>John Doe</td><td>Yala Safari</td><td>Mar 20, 2024</td><td><span class="badge badge-green">Completed</span></td><td>$1,200</td></tr>
+                            <tr><td>#BK-2024-002</td><td>Sarah Smith</td><td>Hikkaduwa Beach</td><td>Mar 22, 2024</td><td><span class="badge badge-amber">Pending</span></td><td>$800</td></tr>
+                            <tr><td>#BK-2024-003</td><td>Mike Johnson</td><td>Arugam Bay Surf</td><td>Mar 18, 2024</td><td><span class="badge badge-green">Completed</span></td><td>$950</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Tours ─────────────────────────────── -->
+        <div id="tours" class="content-section">
+            <div class="header">
+                <h1>Tours Management</h1>
+                <button class="btn btn-primary" onclick="openModal('tourModal')">+ Add New Tour</button>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="tours-list">All Tours</div>
+                <div class="tab" data-tab="tours-edit">Edit / Delete</div>
+            </div>
+
+            <div id="tours-list" class="tab-content active">
+                <div class="filter-bar">
+                    <input type="text" placeholder="Search tours...">
+                    <select><option>All Destinations</option><option>South</option><option>East</option><option>Central</option></select>
+                    <select><option>All Prices</option><option>$0–$500</option><option>$500–$1000</option><option>$1000+</option></select>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Tour Name</th><th>Destination</th><th>Price</th><th>Duration</th><th>Slots</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Yala Safari</td><td>Yala</td><td>$1,200</td><td>3 Days</td><td>8/15</td><td><button class="btn btn-secondary btn-sm" onclick="editTour(1)">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteTour(1)">Delete</button></td></tr>
+                            <tr><td>Hikkaduwa Dive &amp; Beach</td><td>Hikkaduwa</td><td>$800</td><td>4 Days</td><td>5/12</td><td><button class="btn btn-secondary btn-sm" onclick="editTour(2)">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteTour(2)">Delete</button></td></tr>
+                            <tr><td>Arugam Bay Surf Camp</td><td>Arugam Bay</td><td>$950</td><td>5 Days</td><td>10/20</td><td><button class="btn btn-secondary btn-sm" onclick="editTour(3)">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteTour(3)">Delete</button></td></tr>
+                            <tr><td>Sinharaja Rainforest Trek</td><td>Sinharaja</td><td>$650</td><td>2 Days</td><td>6/10</td><td><button class="btn btn-secondary btn-sm" onclick="editTour(4)">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteTour(4)">Delete</button></td></tr>
+                            <tr><td>Ella Highlands</td><td>Ella</td><td>$1,100</td><td>4 Days</td><td>7/14</td><td><button class="btn btn-secondary btn-sm" onclick="editTour(5)">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteTour(5)">Delete</button></td></tr>
+                            <tr><td>Sri Lankan Heritage Tour</td><td>Cultural Triangle</td><td>$1,500</td><td>6 Days</td><td>4/10</td><td><button class="btn btn-secondary btn-sm" onclick="editTour(6)">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteTour(6)">Delete</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tours-edit" class="tab-content">
+                <div class="card">
+                    <h3>Edit or Remove Tours</h3>
+                    <p style="color:var(--muted);margin-top:12px;">Select a tour from the list above to update its price, itinerary, or remove outdated listings.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Bookings ───────────────────────────── -->
+        <div id="bookings" class="content-section">
+            <div class="header">
+                <h1>Bookings Management</h1>
+                <button class="btn btn-secondary" onclick="exportBookings()">📥 Export</button>
+            </div>
+
+            <div class="filter-bar">
+                <input type="date">
+                <select><option>All Status</option><option>Completed</option><option>Pending</option><option>Cancelled</option></select>
+                <select><option>All Tours</option><option>Yala Safari</option><option>Hikkaduwa Dive &amp; Beach</option><option>Arugam Bay Surf Camp</option></select>
+                <input type="text" placeholder="Search booking ID...">
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Booking ID</th><th>Customer</th><th>Tour</th><th>Travelers</th><th>Date</th><th>Status</th><th>Amount</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>#BK-2024-001</td><td>John Doe</td><td>Yala Safari</td><td>2 Adults, 1 Child</td><td>Mar 10, 2024</td><td><span class="badge badge-green">Completed</span></td><td>$1,200</td><td><button class="btn btn-secondary btn-sm" onclick="viewBooking(1)">View</button></td></tr>
+                        <tr><td>#BK-2024-002</td><td>Sarah Smith</td><td>Hikkaduwa Beach</td><td>1 Adult</td><td>Mar 15, 2024</td><td><span class="badge badge-amber">Pending</span></td><td>$800</td><td><button class="btn btn-secondary btn-sm" onclick="viewBooking(2)">View</button></td></tr>
+                        <tr><td>#BK-2024-003</td><td>Mike Johnson</td><td>Arugam Bay Surf</td><td>3 Adults</td><td>Mar 12, 2024</td><td><span class="badge badge-red">Cancelled</span></td><td>$950</td><td><button class="btn btn-secondary btn-sm" onclick="viewBooking(3)">View</button></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── Users ─────────────────────────────── -->
+        <div id="users" class="content-section">
+            <div class="header">
+                <h1>User Management</h1>
+                <button class="btn btn-secondary" onclick="searchUsers()">🔍 Search Users</button>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="users-all">All Users</div>
+                <div class="tab" data-tab="users-agents">Travel Agents</div>
+                <div class="tab" data-tab="users-corporate">Corporate Partners</div>
+            </div>
+
+            <div id="users-all" class="tab-content active">
+                <div class="filter-bar">
+                    <input type="text" placeholder="Search users...">
+                    <select><option>All Roles</option><option>Solo Traveler</option><option>Travel Agent</option><option>Corporate Partner</option></select>
+                    <select><option>All Statuses</option><option>Active</option><option>Inactive</option></select>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>John Doe</td><td>john@example.com</td><td>Solo Traveler</td><td><span class="badge badge-blue">Active</span></td><td>Jan 15, 2024</td><td><button class="btn btn-secondary btn-sm" onclick="viewUser(1)">View</button> <button class="btn btn-danger btn-sm" onclick="disableUser(1)">Disable</button></td></tr>
+                            <tr><td>Travel Experts Co.</td><td>info@travelexperts.com</td><td>Travel Agent</td><td><span class="badge badge-blue">Active</span></td><td>Feb 20, 2024</td><td><button class="btn btn-secondary btn-sm" onclick="viewUser(2)">View</button> <button class="btn btn-danger btn-sm" onclick="disableUser(2)">Disable</button></td></tr>
+                            <tr><td>Lanka Tours Ltd.</td><td>contact@lankatours.lk</td><td>Corporate Partner</td><td><span class="badge badge-blue">Active</span></td><td>Mar 1, 2024</td><td><button class="btn btn-secondary btn-sm" onclick="viewUser(3)">View</button> <button class="btn btn-danger btn-sm" onclick="disableUser(3)">Disable</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="users-agents" class="tab-content">
+                <div class="card">
+                    <h3>Travel Agents</h3>
+                    <p style="color:var(--muted);margin-top:12px;">Agents with B2B pricing and bulk booking access.</p>
+                </div>
+            </div>
+
+            <div id="users-corporate" class="tab-content">
+                <div class="card">
+                    <h3>Corporate Partners</h3>
+                    <p style="color:var(--muted);margin-top:12px;">Corporate accounts with group booking capabilities.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Reports ────────────────────────────── -->
+        <div id="reports" class="content-section">
+            <div class="header">
+                <h1>Reports &amp; Analytics</h1>
+                <button class="btn btn-primary" onclick="generateReport()">📊 Generate Report</button>
+            </div>
+
+            <div class="filter-bar">
+                <input type="date" placeholder="From Date">
+                <input type="date" placeholder="To Date">
+                <select><option>All Metrics</option><option>Total Bookings</option><option>Revenue by Tour</option><option>Cancellation Rates</option><option>Top Destinations</option></select>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value">$84,230</div></div>
+                <div class="stat-card" style="border-left-color:var(--green);"><div class="stat-label">Completed Bookings</div><div class="stat-value">1,142</div></div>
+                <div class="stat-card" style="border-left-color:var(--red);"><div class="stat-label">Cancellation Rate</div><div class="stat-value">2.8%</div></div>
+                <div class="stat-card" style="border-left-color:var(--amber);"><div class="stat-label">Avg Booking Value</div><div class="stat-value">$1,156</div></div>
+            </div>
+
+            <div class="card">
+                <h3>Top Destinations</h3>
+                <div style="margin-top:16px;">
+                    <div class="progress-row"><span class="progress-label">Yala</span><div class="progress-track"><div class="progress-fill" style="width:85%"></div></div><span class="progress-count">245</span></div>
+                    <div class="progress-row"><span class="progress-label">Hikkaduwa</span><div class="progress-track"><div class="progress-fill" style="width:72%"></div></div><span class="progress-count">210</span></div>
+                    <div class="progress-row"><span class="progress-label">Arugam Bay</span><div class="progress-track"><div class="progress-fill" style="width:65%"></div></div><span class="progress-count">188</span></div>
+                    <div class="progress-row"><span class="progress-label">Ella</span><div class="progress-track"><div class="progress-fill" style="width:54%"></div></div><span class="progress-count">155</span></div>
+                    <div class="progress-row"><span class="progress-label">Sinharaja</span><div class="progress-track"><div class="progress-fill" style="width:40%"></div></div><span class="progress-count">112</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Support ────────────────────────────── -->
+        <div id="support" class="content-section">
+            <div class="header">
+                <h1>Customer Support</h1>
+                <button class="btn btn-secondary" onclick="markAsResolved()">✓ Mark Resolved</button>
+            </div>
+
+            <div class="filter-bar">
+                <input type="text" placeholder="Search inquiries...">
+                <select><option>All Inquiries</option><option>Tour Questions</option><option>Booking Help</option><option>Payment Issues</option><option>Complaints</option></select>
+                <select><option>All Status</option><option>Open</option><option>In Progress</option><option>Resolved</option></select>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Inquiry ID</th><th>Customer</th><th>Category</th><th>Subject</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>#INQ-001</td><td>John Doe</td><td>Tour Questions</td><td>Dietary needs for Yala Safari</td><td>Mar 20, 2024</td><td><span class="badge badge-green">Resolved</span></td><td><button class="btn btn-secondary btn-sm" onclick="viewInquiry(1)">View</button></td></tr>
+                        <tr><td>#INQ-002</td><td>Sarah Smith</td><td>Booking Help</td><td>Cannot complete payment</td><td>Mar 22, 2024</td><td><span class="badge badge-amber">In Progress</span></td><td><button class="btn btn-secondary btn-sm" onclick="viewInquiry(2)">View</button></td></tr>
+                        <tr><td>#INQ-003</td><td>Mike Johnson</td><td>Complaints</td><td>Accommodation below expectations</td><td>Mar 18, 2024</td><td><span class="badge badge-amber">In Progress</span></td><td><button class="btn btn-secondary btn-sm" onclick="viewInquiry(3)">View</button></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── Settings ───────────────────────────── -->
+        <div id="settings" class="content-section">
+            <div class="header">
+                <h1>Settings</h1>
+                <button class="btn btn-primary" onclick="saveSettings()">💾 Save Changes</button>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="settings-general">General</div>
+                <div class="tab" data-tab="settings-security">Security</div>
+            </div>
+
+            <div id="settings-general" class="tab-content active">
+                <div class="card">
+                    <h3>General Settings</h3>
+                    <div style="margin-top:18px;">
+                        <div class="form-group"><label>Platform Name</label><input type="text" value="Coastal Tours"></div>
+                        <div class="form-group"><label>Support Email</label><input type="email" value="support@coastaltours.lk"></div>
+                        <div class="form-group"><label>Default Currency</label>
+                            <select><option>USD</option><option>EUR</option><option>GBP</option><option selected>LKR</option></select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Commission (%)</label><input type="number" value="10"></div>
+                            <div class="form-group"><label>Max Upload (MB)</label><input type="number" value="10"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings-security" class="tab-content">
+                <div class="card">
+                    <h3>Security Settings</h3>
+                    <div style="margin-top:18px;">
+                        <div class="form-row">
+                            <div class="form-group"><label>Password Reset Expiry (hrs)</label><input type="number" value="24"></div>
+                            <div class="form-group"><label>Session Timeout (min)</label><input type="number" value="30"></div>
+                        </div>
+                        <div class="form-group"><label><input type="checkbox" checked> Enable Two-Factor Authentication</label></div>
+                        <div class="form-group"><label><input type="checkbox" checked> Require Email Verification</label></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /main -->
+</div><!-- /container -->
+
+<!-- ── Add Tour Modal ───────────────────────────────────── -->
+<div id="tourModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Tour</h2>
+            <button class="close-btn" onclick="closeModal('tourModal')">×</button>
+        </div>
+        <div class="form-group"><label>Tour Name</label><input type="text" placeholder="Enter tour name"></div>
+        <div class="form-row">
+            <div class="form-group"><label>Destination</label><input type="text" placeholder="Destination"></div>
+            <div class="form-group"><label>Price (USD)</label><input type="number" placeholder="0.00"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Duration (Days)</label><input type="number" placeholder="Days"></div>
+            <div class="form-group"><label>Available Slots</label><input type="number" placeholder="Slots"></div>
+        </div>
+        <div class="form-group"><label>Full Itinerary</label><textarea placeholder="Enter detailed itinerary" rows="4"></textarea></div>
+        <div class="form-row">
+            <div class="form-group"><label>Inclusions</label><textarea placeholder="What's included" rows="3"></textarea></div>
+            <div class="form-group"><label>Exclusions</label><textarea placeholder="What's not included" rows="3"></textarea></div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+            <button class="btn btn-secondary" onclick="closeModal('tourModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveTour(); closeModal('tourModal');">Save Tour</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Login
+    function doLogin() {
+        const u = document.getElementById('login-user').value.trim().toLowerCase();
+        const p = document.getElementById('login-pass').value;
+        if (u === '' && p === '') {
+            document.getElementById('login-screen').style.display = 'none';
+        } else {
+            document.getElementById('login-error').textContent = 'Invalid credentials. Please try again.';
+        }
+    }
+
+    document.getElementById('login-pass').addEventListener('keydown', e => {
+        if (e.key === 'Enter') doLogin();
+    });
+
+    // Sidebar navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(this.dataset.nav).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Tab navigation
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            this.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            let el = this.parentElement.nextElementSibling;
+            while (el && el.classList.contains('tab-content')) {
+                el.classList.remove('active');
+                el = el.nextElementSibling;
+            }
+            document.getElementById(tabName).classList.add('active');
+        });
+    });
+
+    // Modal helpers
+    function openModal(id)  { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    window.onclick = e => { if (e.target.classList.contains('modal')) e.target.classList.remove('active'); };
+
+    // Actions
+    function saveTour()      { alert('Tour saved successfully!'); }
+    function editTour(id)    { alert('Edit tour ' + id); }
+    function deleteTour(id)  { if (confirm('Delete this tour?')) alert('Tour deleted.'); }
+    function viewBooking(id) { alert('Booking details for #' + id); }
+    function exportBookings(){ alert('Exporting bookings as CSV…'); }
+    function viewUser(id)    { alert('User profile ' + id); }
+    function disableUser(id) { if (confirm('Disable this account?')) alert('Account disabled.'); }
+    function searchUsers()   { alert('Search users…'); }
+    function generateReport(){ alert('Generating report…'); }
+    function markAsResolved(){ alert('Marked as resolved.'); }
+    function saveSettings()  { alert('Settings saved!'); }
+    function viewInquiry(id) { alert('Inquiry #' + id); }
+</script>
+</body>
+</html>
